@@ -2,9 +2,10 @@
 
 A modern, responsive movie streaming and discovery web application built with React.js and Tailwind CSS. Search for movies using the OMDb API, view detailed information, manage your watchlist, and discover new favorites with an engaging homepage experience.
 
-![CineStream](https://img.shields.io/badge/CineStream-Movie%20Discovery-blue?style=for-the-badge)
-![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=for-the-badge&logo=react)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.3.0-38B2AC?style=for-the-badge&logo=tailwind-css)
+## 🚀 Live Demo  
+🔗 [CineStream Live Demo](https://cine-stream-movie-app-53ur.vercel.app/)
+
+<img width="1366" height="855" alt="image" src="https://github.com/user-attachments/assets/96cca788-5540-4a65-897e-525f32377c07" />
 
 ## ✨ Features
 
@@ -37,16 +38,6 @@ A modern, responsive movie streaming and discovery web application built with Re
 - 🌙 **Dark Theme**: Modern dark UI with gradient accents
 - ⚡ **Fast Performance**: Optimized React components with lazy loading
 - 🎭 **Interactive Elements**: Hover effects, smooth transitions, and micro-animations
-
-## 🚀 Live Demo
-
-Experience CineStream's features:
-- **Welcome Screen**: Engaging gradient welcome with featured movies
-- **Genre Browsing**: Click any genre category to explore movies
-- **Search Experience**: Type in the search bar for auto-suggestions
-- **Movie Discovery**: Browse popular franchises with one click
-
-![Demo Screenshot](https://via.placeholder.com/800x400/1f2937/ffffff?text=CineStream+Homepage+Demo)
 
 ## 🛠️ Technologies Used
 
