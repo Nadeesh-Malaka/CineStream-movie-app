@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@layer base {
+  * {
+    @apply border-gray-700;
+  }
+  body {
+    @apply bg-gray-900 text-white font-sans;
+  }
+}
+
+@layer components {
+  .movie-card {
+    @apply bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300;
+  }
+  
+  .movie-card:hover {
+    @apply ring-2 ring-primary-500;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg;
+  }
+
+  /* Category Cards */
+  .category-card {
+    @apply bg-gradient-to-br from-gray-800 to-gray-900 hover:from-primary-600 hover:to-purple-600 rounded-xl p-4 transition-all duration-300 transform hover:scale-105 hover:shadow-xl border border-gray-700 hover:border-transparent;
+  }
+
+  /* Trending Cards */
+  .trending-card {
+    @apply group relative rounded-xl p-6 text-white hover:scale-105 transform transition-all duration-300 shadow-lg hover:shadow-2xl overflow-hidden;
+  }
+
+  /* Search Suggestions */
+  .search-suggestion {
+    @apply w-full px-4 py-3 text-left text-white hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg flex items-center space-x-3 group;
+  }
+
+  /* Enhanced animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(147, 51, 234, 0.5);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+}

@@ -1,0 +1,50 @@
+/* App-specific styles */
+.App {
+  text-align: center;
+}
+
+/* Loading spinner */
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 2s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Movie poster hover effect */
+.movie-poster {
+  transition: transform 0.3s ease;
+}
+
+.movie-poster:hover {
+  transform: scale(1.05);
+}
+
+/* Star rating */
+.star {
+  color: #ffd700;
+}
+
+/* Responsive video container */
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
