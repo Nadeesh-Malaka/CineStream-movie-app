@@ -3,8 +3,56 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import MovieGrid from '../components/MovieGrid';
 import movieService from '../services/movieService';
 
+// Category Section Components
+const CategoryMovieCard = ({ movie, onClick }) => (
+  <div
+    onClick={onClick}
+    className="bg-gray-800 rounded-lg overflow-hidden hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer group min-w-[140px]"
+  >
+    <div className="aspect-[2/3] overflow-hidden">
+      <img
+        src={movie.Poster !== 'N/A' ? movie.Poster : `https://via.placeholder.com/280x420/1f2937/ffffff?text=${encodeURIComponent(movie.Title)}`}
+        alt={movie.Title}
+        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+        loading="lazy"
+      />
+    </div>
+    <div className="p-3">
+      <h3 className="text-white font-medium text-xs mb-1 line-clamp-2 group-hover:text-primary-400">
+        {movie.Title}
+      </h3>
+      <p className="text-gray-400 text-xs">{movie.Year}</p>
+    </div>
+  </div>
+);
+
+const CategorySection = ({ searchTerms, isLoading, movies, navigate }) => {
+  if (isLoading) {
+    return (
+      <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="bg-gray-800 rounded-lg h-64 min-w-[140px] animate-pulse"></div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide">
+      {movies.slice(0, 8).map((movie) => (
+        <CategoryMovieCard
+          key={movie.imdbID}
+          movie={movie}
+          onClick={() => navigate(`/movie/${movie.imdbID}`)}
+        />
+      ))}
+    </div>
+  );
+};
+
 const Home = () => {
   const [movies, setMovies] = useState([]);
+  const [allMovies, setAllMovies] = useState([]); // Store all search results for filtering
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchParams] = useSearchParams();
@@ -13,6 +61,24 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [featuredMovies, setFeaturedMovies] = useState([]);
   const [featuredLoading, setFeaturedLoading] = useState(false);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    year: '',
+    type: '', // movie, series, episode
+    sortBy: 'relevance' // relevance, year, title
+  });
+  
+  // Category movie states
+  const [topRatedMovies, setTopRatedMovies] = useState([]);
+  const [topRatedLoading, setTopRatedLoading] = useState(false);
+  const [actionMovies, setActionMovies] = useState([]);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [sciFiMovies, setSciFiMovies] = useState([]);
+  const [sciFiLoading, setSciFiLoading] = useState(false);
+  const [horrorMovies, setHorrorMovies] = useState([]);
+  const [horrorLoading, setHorrorLoading] = useState(false);
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +92,7 @@ const Home = () => {
     } else {
       // Load featured movies for homepage
       loadFeaturedMovies();
+      loadCategoryMovies();
       setMovies([]);
       setSearchQuery('');
       setError(null);
@@ -57,19 +124,84 @@ const Home = () => {
     }
   };
 
+  // Load category movies for homepage sections
+  const loadCategoryMovies = async () => {
+    // Load Top Rated movies
+    setTopRatedLoading(true);
+    try {
+      const topRated = await movieService.searchMovies('Godfather', 1);
+      if (topRated.Response === 'True') {
+        setTopRatedMovies(topRated.Search || []);
+      }
+    } catch (error) {
+      console.error('Error loading top rated movies:', error);
+    } finally {
+      setTopRatedLoading(false);
+    }
+
+    // Load Action movies
+    setActionLoading(true);
+    try {
+      const action = await movieService.searchMovies('Avengers', 1);
+      if (action.Response === 'True') {
+        setActionMovies(action.Search || []);
+      }
+    } catch (error) {
+      console.error('Error loading action movies:', error);
+    } finally {
+      setActionLoading(false);
+    }
+
+    // Load Sci-Fi movies
+    setSciFiLoading(true);
+    try {
+      const sciFi = await movieService.searchMovies('Interstellar', 1);
+      if (sciFi.Response === 'True') {
+        setSciFiMovies(sciFi.Search || []);
+      }
+    } catch (error) {
+      console.error('Error loading sci-fi movies:', error);
+    } finally {
+      setSciFiLoading(false);
+    }
+
+    // Load Horror movies
+    setHorrorLoading(true);
+    try {
+      const horror = await movieService.searchMovies('Halloween', 1);
+      if (horror.Response === 'True') {
+        setHorrorMovies(horror.Search || []);
+      }
+    } catch (error) {
+      console.error('Error loading horror movies:', error);
+    } finally {
+      setHorrorLoading(false);
+    }
+  };
+
   const searchMovies = async (query, page = 1) => {
     if (!query.trim()) return;
     
     setLoading(true);
     setError(null);
     
+    // Reset filters when starting a new search
+    setFilters({
+      year: '',
+      type: '',
+      sortBy: 'relevance'
+    });
+    
     try {
       const response = await movieService.searchMovies(query, page);
       
       if (response.Response === 'True') {
-        setMovies(response.Search || []);
+        const searchResults = response.Search || [];
+        setAllMovies(searchResults); // Store all results for filtering
+        setMovies(searchResults); // Initially show all results
         setTotalResults(parseInt(response.totalResults) || 0);
       } else {
+        setAllMovies([]);
         setMovies([]);
         setTotalResults(0);
         setError(response.Error || 'No movies found');
@@ -77,11 +209,68 @@ const Home = () => {
     } catch (err) {
       console.error('Search error:', err);
       setError('Failed to search movies. Please try again.');
+      setAllMovies([]);
       setMovies([]);
       setTotalResults(0);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter movies based on current filter settings
+  const applyFilters = () => {
+    let filteredMovies = [...allMovies];
+
+    // Filter by year
+    if (filters.year) {
+      filteredMovies = filteredMovies.filter(movie => movie.Year === filters.year);
+    }
+
+    // Filter by type
+    if (filters.type) {
+      filteredMovies = filteredMovies.filter(movie => 
+        movie.Type.toLowerCase() === filters.type.toLowerCase()
+      );
+    }
+
+    // Sort movies
+    if (filters.sortBy === 'year') {
+      filteredMovies.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
+    } else if (filters.sortBy === 'title') {
+      filteredMovies.sort((a, b) => a.Title.localeCompare(b.Title));
+    }
+
+    setMovies(filteredMovies);
+  };
+
+  // Apply filters whenever filter state changes
+  useEffect(() => {
+    if (allMovies.length > 0) {
+      // Only apply filters if at least one filter is active
+      const hasActiveFilters = filters.year || filters.type || filters.sortBy !== 'relevance';
+      
+      if (hasActiveFilters) {
+        applyFilters();
+      } else {
+        // If no filters are active, show all movies
+        setMovies(allMovies);
+      }
+    }
+  }, [filters, allMovies]);
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      year: '',
+      type: '',
+      sortBy: 'relevance'
+    });
   };
 
   const handlePageChange = (newPage) => {
@@ -156,17 +345,21 @@ const Home = () => {
           <>
             {/* Quick Categories */}
             <div className="mb-12">
-              <h2 className="text-2xl font-bold text-white mb-6 text-center">🎭 Browse by Genre</h2>
-              <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-4">
+              <h2 className="text-2xl font-bold text-white mb-6 text-center">🎭 Browse by Genre & Collections</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
                 {[
-                  { name: 'Action', icon: '💥', query: 'action' },
-                  { name: 'Comedy', icon: '😄', query: 'comedy' },
-                  { name: 'Horror', icon: '👻', query: 'horror' },
-                  { name: 'Romance', icon: '💕', query: 'romance' },
-                  { name: 'Sci-Fi', icon: '🚀', query: 'science fiction' },
-                  { name: 'Drama', icon: '🎭', query: 'drama' },
-                  { name: 'Thriller', icon: '🔪', query: 'thriller' },
-                  { name: 'Fantasy', icon: '🧙‍♂️', query: 'fantasy' }
+                  { name: 'Action', icon: '💥', query: 'action', gradient: 'from-red-600 to-orange-600' },
+                  { name: 'Comedy', icon: '😄', query: 'comedy', gradient: 'from-yellow-500 to-orange-500' },
+                  { name: 'Horror', icon: '👻', query: 'horror', gradient: 'from-purple-600 to-pink-600' },
+                  { name: 'Romance', icon: '💕', query: 'romance', gradient: 'from-pink-500 to-rose-500' },
+                  { name: 'Sci-Fi', icon: '🚀', query: 'science fiction', gradient: 'from-blue-600 to-cyan-600' },
+                  { name: 'Drama', icon: '🎭', query: 'drama', gradient: 'from-indigo-600 to-purple-600' },
+                  { name: 'Thriller', icon: '🔪', query: 'thriller', gradient: 'from-gray-700 to-gray-900' },
+                  { name: 'Fantasy', icon: '🧙‍♂️', query: 'fantasy', gradient: 'from-emerald-600 to-teal-600' },
+                  { name: 'Animation', icon: '🎨', query: 'animation', gradient: 'from-violet-600 to-purple-600' },
+                  { name: 'War', icon: '⚔️', query: 'war', gradient: 'from-stone-600 to-slate-600' },
+                  { name: 'Western', icon: '🤠', query: 'western', gradient: 'from-amber-600 to-yellow-600' },
+                  { name: 'Crime', icon: '🕵️', query: 'crime', gradient: 'from-red-800 to-red-900' }
                 ].map((genre) => (
                   <button
                     key={genre.name}
@@ -176,14 +369,17 @@ const Home = () => {
                       params.set('page', '1');
                       navigate(`?${params.toString()}`);
                     }}
-                    className="bg-gray-800 hover:bg-gradient-to-br hover:from-primary-600 hover:to-purple-600 rounded-lg p-4 text-center transition-all duration-200 transform hover:scale-105 hover:shadow-lg group"
+                    className={`bg-gradient-to-br ${genre.gradient} hover:scale-105 rounded-xl p-4 text-center transition-all duration-300 transform hover:shadow-xl hover:shadow-primary-500/25 group`}
                   >
-                    <div className="text-2xl mb-2">{genre.icon}</div>
-                    <div className="text-white text-sm font-medium group-hover:text-white">{genre.name}</div>
+                    <div className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-200">{genre.icon}</div>
+                    <div className="text-white text-sm font-bold group-hover:text-white">{genre.name}</div>
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Movie Collections */}
+           
 
             {/* Featured Movies */}
             <div className="mb-12">
@@ -242,22 +438,132 @@ const Home = () => {
               )}
             </div>
 
-            {/* Popular Searches */}
+            {/* Popular Searches with Movie Cards */}
             <div className="mb-12">
-              <h3 className="text-2xl font-bold text-white mb-6 text-center">🔥 Popular Searches</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-4xl mx-auto">
-                {['Marvel', 'Batman', 'Star Wars', 'Harry Potter', 'Avengers', 'Spider-Man', 'Lord of Rings', 'Fast Furious', 'James Bond', 'Jurassic Park', 'Transformers', 'Mission Impossible'].map((term) => (
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">🔥 Trending & Popular</h3>
+              <div className="space-y-8">
+                {/* Top Rated Movies */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-yellow-400 flex items-center">
+                      <span className="mr-2">🏆</span>Top Rated & Award Winners
+                    </h4>
+                    <button
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        params.set('q', 'Godfather Shawshank Dark Knight');
+                        params.set('page', '1');
+                        navigate(`?${params.toString()}`);
+                      }}
+                      className="text-primary-400 hover:text-primary-300 text-sm font-medium"
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <CategorySection 
+                    searchTerms={['Godfather', 'Shawshank', 'Dark Knight']}
+                    isLoading={topRatedLoading}
+                    movies={topRatedMovies}
+                    navigate={navigate}
+                  />
+                </div>
+
+                {/* Action & Adventure */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-red-400 flex items-center">
+                      <span className="mr-2">💥</span>Action & Adventure
+                    </h4>
+                    <button
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        params.set('q', 'action adventure');
+                        params.set('page', '1');
+                        navigate(`?${params.toString()}`);
+                      }}
+                      className="text-primary-400 hover:text-primary-300 text-sm font-medium"
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <CategorySection 
+                    searchTerms={['Avengers', 'John Wick', 'Mad Max']}
+                    isLoading={actionLoading}
+                    movies={actionMovies}
+                    navigate={navigate}
+                  />
+                </div>
+
+                {/* Sci-Fi & Fantasy */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-blue-400 flex items-center">
+                      <span className="mr-2">🚀</span>Sci-Fi & Fantasy
+                    </h4>
+                    <button
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        params.set('q', 'sci-fi fantasy');
+                        params.set('page', '1');
+                        navigate(`?${params.toString()}`);
+                      }}
+                      className="text-primary-400 hover:text-primary-300 text-sm font-medium"
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <CategorySection 
+                    searchTerms={['Interstellar', 'Blade Runner', 'Alien']}
+                    isLoading={sciFiLoading}
+                    movies={sciFiMovies}
+                    navigate={navigate}
+                  />
+                </div>
+
+                {/* Horror & Thriller */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-purple-400 flex items-center">
+                      <span className="mr-2">👻</span>Horror & Thriller
+                    </h4>
+                    <button
+                      onClick={() => {
+                        const params = new URLSearchParams();
+                        params.set('q', 'horror thriller');
+                        params.set('page', '1');
+                        navigate(`?${params.toString()}`);
+                      }}
+                      className="text-primary-400 hover:text-primary-300 text-sm font-medium"
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <CategorySection 
+                    searchTerms={['Halloween', 'Scream', 'Conjuring']}
+                    isLoading={horrorLoading}
+                    movies={horrorMovies}
+                    navigate={navigate}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Browse by Years */}
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">📅 Browse by Year</h3>
+              <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-10 gap-3">
+                {['2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2010s', '2000s', '1990s', '1980s', '1970s'].map((year) => (
                   <button
-                    key={term}
+                    key={year}
                     onClick={() => {
                       const params = new URLSearchParams();
-                      params.set('q', term);
+                      params.set('q', `movie ${year}`);
                       params.set('page', '1');
                       navigate(`?${params.toString()}`);
                     }}
-                    className="bg-gray-800 hover:bg-gradient-to-r hover:from-primary-600 hover:to-purple-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg"
+                    className="bg-gradient-to-br from-gray-700 to-gray-800 hover:from-primary-600 hover:to-purple-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg text-sm"
                   >
-                    {term}
+                    {year}
                   </button>
                 ))}
               </div>
@@ -265,15 +571,78 @@ const Home = () => {
           </>
         )}
 
-        {/* Search Results Grid */}
+        {/* Search Results with Filters */}
         {searchQuery && (
-          <MovieGrid
-            movies={movies}
-            loading={loading}
-            error={error}
-            onWatchlistChange={() => {}}
-            onFavoritesChange={() => {}}
-          />
+          <>
+            {/* Filter Controls */}
+            {movies.length > 0 && (
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                  <h3 className="text-sm font-medium text-gray-300">
+                    {movies.length} of {totalResults} movies
+                  </h3>
+                  <button
+                    onClick={clearFilters}
+                    className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Year Filter */}
+                  <select
+                    value={filters.year}
+                    onChange={(e) => handleFilterChange('year', e.target.value)}
+                    className="bg-gray-900/80 border border-gray-600/50 text-gray-300 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                  >
+                    <option value="" className="bg-gray-900">All Years</option>
+                    {Array.from(new Set(allMovies.map(movie => movie.Year)))
+                      .filter(year => year && year !== 'N/A')
+                      .sort((a, b) => parseInt(b) - parseInt(a))
+                      .map(year => (
+                        <option key={year} value={year} className="bg-gray-900">{year}</option>
+                      ))}
+                  </select>
+
+                  {/* Type Filter */}
+                  <select
+                    value={filters.type}
+                    onChange={(e) => handleFilterChange('type', e.target.value)}
+                    className="bg-gray-900/80 border border-gray-600/50 text-gray-300 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                  >
+                    <option value="" className="bg-gray-900">All Types</option>
+                    {Array.from(new Set(allMovies.map(movie => movie.Type)))
+                      .filter(type => type)
+                      .map(type => (
+                        <option key={type} value={type} className="bg-gray-900">
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </option>
+                      ))}
+                  </select>
+
+                  {/* Sort Filter */}
+                  <select
+                    value={filters.sortBy}
+                    onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                    className="bg-gray-900/80 border border-gray-600/50 text-gray-300 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                  >
+                    <option value="relevance" className="bg-gray-900">Relevance</option>
+                    <option value="year" className="bg-gray-900">Year (Newest)</option>
+                    <option value="title" className="bg-gray-900">Title (A-Z)</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            <MovieGrid
+              movies={movies}
+              loading={loading}
+              error={error}
+              onWatchlistChange={() => {}}
+              onFavoritesChange={() => {}}
+            />
+          </>
         )}
 
         {/* Pagination */}
