@@ -5,8 +5,7 @@ A modern, responsive movie streaming and discovery web application built with Re
 ## 🚀 Live Demo  
 🔗 [CineStream Live Demo](https://cine-stream-movie-app-53ur.vercel.app/)
 
-![Uploading image.png…]()
-
+ <img width="1366" height="933" alt="d2" src="https://github.com/user-attachments/assets/cbd42ed8-2108-451b-89cb-e6eee875ea8e" />
 
 ## ✨ Features
 
@@ -234,16 +233,6 @@ The application is fully responsive with breakpoints:
 2. Deploy the `build` folder to Netlify
 3. Add environment variables in Netlify dashboard
 
-### Vercel
-1. Connect your GitHub repository
-2. Add environment variables
-3. Deploy automatically on push
-
-### GitHub Pages
-1. Install gh-pages: `npm install --save-dev gh-pages`
-2. Add to package.json: `"homepage": "https://nadeesh-malaka.github.io/CineStream-movie-app"`
-3. Deploy: `npm run deploy`
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -251,10 +240,6 @@ The application is fully responsive with breakpoints:
 3. Commit changes: `git commit -m 'Add amazing feature'`
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -280,6 +265,8 @@ If you have any questions, suggestions, or need help:
 - **CORS Errors**: OMDb API should work from localhost, but check browser console
 - **Loading Issues**: Ensure stable internet connection for API calls
 - **Storage Problems**: Clear browser local storage if watchlist/favorites aren't working
+  
+##                                       Happy Coding 😎❤
 
 ---
 
