@@ -5,7 +5,8 @@ A modern, responsive movie streaming and discovery web application built with Re
 ## 🚀 Live Demo  
 🔗 [CineStream Live Demo](https://cine-stream-movie-app-53ur.vercel.app/)
 
-<img width="1366" height="855" alt="image" src="https://github.com/user-attachments/assets/96cca788-5540-4a65-897e-525f32377c07" />
+![Uploading image.png…]()
+
 
 ## ✨ Features
 
